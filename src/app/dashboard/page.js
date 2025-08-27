@@ -12,34 +12,36 @@ export default function Dashboard() {
   const [habits, setHabits] = useState([]);
   const [newHabit, setNewHabit] = useState("");
 
-  // Demo user ID; replace with actual logged-in user ID later
-  const userId = "your-demo-user-id";
-
   useEffect(() => {
-    setUsername("Samuel"); // demo
+    // Optionally get username from localStorage token
+    const token = localStorage.getItem("token");
+    if (token) {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      setUsername(payload.name || "User");
+    }
+
     loadHabits();
   }, []);
 
-  // Fetch habits from backend
+  // Fetch all habits
   const loadHabits = async () => {
     try {
-      const data = await fetchHabits(userId);
+      const data = await fetchHabits();
       setHabits(data);
     } catch (err) {
-      console.error("Error fetching habits:", err);
+      console.error("Error fetching habits:", err.message);
     }
   };
 
-  // Add a new habit
+  // Add new habit
   const handleAddHabit = async () => {
     if (!newHabit) return;
     try {
-      const createdHabit = await addHabit({ user: userId, name: newHabit });
-      console.log("Created habit:", createdHabit);
+      await addHabit(newHabit);
       setNewHabit("");
       loadHabits();
     } catch (err) {
-      console.error("Error adding habit:", err);
+      console.error("Error adding habit:", err.message);
     }
   };
 
@@ -49,7 +51,7 @@ export default function Dashboard() {
       await toggleHabit(id);
       loadHabits();
     } catch (err) {
-      console.error("Error toggling habit:", err);
+      console.error("Error toggling habit:", err.message);
     }
   };
 
@@ -59,7 +61,7 @@ export default function Dashboard() {
       await deleteHabit(id);
       loadHabits();
     } catch (err) {
-      console.error("Error deleting habit:", err);
+      console.error("Error deleting habit:", err.message);
     }
   };
 

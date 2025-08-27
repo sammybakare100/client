@@ -1,119 +1,111 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import React, { useState } from "react";
 
-export default function Register() {
+const Register = () => {
   const [formData, setFormData] = useState({
-    name: "",
+    username: "",
     email: "",
     password: "",
-    confirmPassword: "",
   });
-  const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter();
+  const [message, setMessage] = useState("");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (
-      !formData.name ||
-      !formData.email ||
-      !formData.password ||
-      !formData.confirmPassword
-    ) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords do not match");
-      return;
-    }
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
 
-    toast.success("Registration successful! 🎉");
-    setTimeout(() => {
-      router.push("/dashboard"); // redirect after success
-    }, 1500);
+      if (res.ok) {
+        setMessage("✅ Registration successful! Redirecting...");
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 1500);
+      } else {
+        setMessage(data.message || "❌ Registration failed");
+      }
+    } catch (err) {
+      setMessage("❌ Something went wrong");
+    }
   };
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center bg-cover bg-center"
+      className="min-h-screen flex items-center justify-center bg-cover bg-center relative"
       style={{
         backgroundImage:
-          "url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1740&q=80')",
+          "url('https://images.unsplash.com/photo-1531983412531-1f49a365ffed?ixlib=rb-4.0.3&auto=format&fit=crop&w=1950&q=80')",
       }}
     >
-      <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-          Register
-        </h1>
+      {/* Dark overlay for readability */}
+      <div className="absolute inset-0 bg-black/50"></div>
+
+      <div className="relative bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl w-full max-w-md">
+        <h2 className="text-3xl font-bold mb-6 text-center text-indigo-700">
+          Create Account ✨
+        </h2>
+        <p className="text-center text-gray-700 mb-6 text-sm">
+          Start your habit tracking journey by creating an account.
+        </p>
+
+        {message && (
+          <p className="mb-4 text-center text-sm font-medium text-gray-800">
+            {message}
+          </p>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              placeholder="Enter your name"
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-700 placeholder:font-medium"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <input
-              type="email"
-              name="email"
-              placeholder="Enter your email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-700 placeholder:font-medium"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="Enter your password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-700 placeholder:font-medium"
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Confirm Password
-            </label>
-            <input
-              type={showPassword ? "text" : "password"}
-              name="confirmPassword"
-              placeholder="Confirm your password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-700 placeholder:font-medium"
-            />
-          </div>
+          <input
+            type="text"
+            name="username"
+            placeholder="👤 Choose a unique username"
+            value={formData.username}
+            onChange={handleChange}
+            className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 placeholder-gray-600 text-sm"
+          />
+          <input
+            type="email"
+            name="email"
+            placeholder="📧 Enter your email address"
+            value={formData.email}
+            onChange={handleChange}
+            className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 placeholder-gray-600 text-sm"
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="🔑 Create a strong password"
+            value={formData.password}
+            onChange={handleChange}
+            className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 placeholder-gray-600 text-sm"
+          />
           <button
             type="submit"
-            className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
+            className="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition"
           >
             Register
           </button>
         </form>
+
+        <p className="mt-6 text-center text-sm text-gray-700">
+          Already have an account?{" "}
+          <a
+            href="/login"
+            className="text-indigo-600 font-semibold hover:underline"
+          >
+            Login here
+          </a>
+        </p>
       </div>
     </div>
   );
-}
+};
+
+export default Register;
