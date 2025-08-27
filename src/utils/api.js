@@ -43,6 +43,11 @@ export const deleteHabit = async (habitId) => {
     method: "DELETE",
     headers: getHeaders(),
   });
-  if (!res.ok) throw new Error("Failed to delete habit");
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.message || "Failed to delete habit");
+  }
+
   return res.json();
 };
